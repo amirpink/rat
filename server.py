@@ -23,24 +23,13 @@ def handle_client(client_socket):
                 print("Client disconnected.")
                 break
 
-            # دستور 'list' برای نمایش فایل‌ها
-            elif command.lower() == 'list':
-                files = os.listdir('.')
-                client_socket.send(str(files).encode())
-
-            # دستور 'sysinfo' برای نمایش اطلاعات سیستم
-            elif command.lower() == 'sysinfo':
-                system_info = os.popen("systeminfo").read()
-                client_socket.send(system_info.encode())
-
-            # اجرای دستورات shell
-            else:
-                try:
-                    output = subprocess.check_output(command, shell=True, stderr=subprocess.STDOUT)
-                    client_socket.send(output)
-                except subprocess.CalledProcessError as e:
-                    error_message = f"Error executing command: {e.output.decode('utf-8')}"
-                    client_socket.send(error_message.encode())
+            # اجرای دستورات shell به طور مستقیم
+            try:
+                output = subprocess.check_output(command, shell=True, stderr=subprocess.STDOUT)
+                client_socket.send(output)
+            except subprocess.CalledProcessError as e:
+                error_message = f"Error executing command: {e.output.decode('utf-8')}"
+                client_socket.send(error_message.encode())
     except Exception as e:
         print(f"Error: {e}")
     finally:
