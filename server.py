@@ -2,10 +2,10 @@ import socket
 import threading
 
 # تنظیمات سرور
-SERVER_IP = '0.0.0.0'  # آدرس 0.0.0.0 به معنای پذیرش اتصال از هر IP است
-SERVER_PORT = 8080  # پورت برای ارتباط با کلاینت
+SERVER_IP = '0.0.0.0'  # آدرس IP عمومی یا داخلی سرور
+SERVER_PORT = 8080  # پورت برای ارتباط با کلاینت‌ها
 
-# تابعی که برای مدیریت هر اتصال به کار می‌رود
+# تابعی برای مدیریت هر اتصال به سرور
 def handle_client(client_socket, addr):
     print(f"Connection established with {addr}")
 
@@ -31,11 +31,11 @@ def handle_client(client_socket, addr):
             print(f"Error while communicating with client {addr}: {e}")
             break
 
-# تابعی که سرور را راه‌اندازی می‌کند
+# تابعی برای راه‌اندازی سرور
 def start_server():
     server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server_socket.bind((SERVER_IP, SERVER_PORT))
-    server_socket.listen(5)  # برای پذیرش چندین اتصال همزمان
+    server_socket.listen(5)  # پذیرش 5 اتصال همزمان
 
     print(f"Server started, listening on {SERVER_IP}:{SERVER_PORT}")
 
@@ -43,7 +43,7 @@ def start_server():
         # پذیرش اتصال از کلاینت
         client_socket, addr = server_socket.accept()
 
-        # ایجاد یک رشته جدید برای مدیریت هر اتصال به طور جداگانه
+        # ایجاد یک رشته جدید برای مدیریت هر اتصال
         client_thread = threading.Thread(target=handle_client, args=(client_socket, addr))
         client_thread.start()
 
