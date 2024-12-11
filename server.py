@@ -2,7 +2,7 @@ import socket
 
 # تنظیمات سرور
 SERVER_IP = '127.0.0.1'  # آدرس IP سیستم محلی
-SERVER_PORT = 5555  # پورت برای ارتباط با کلاینت
+SERVER_PORT = 8080  # پورت برای ارتباط با کلاینت
 
 def start_server():
     server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
